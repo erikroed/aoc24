@@ -7,7 +7,7 @@ import kotlin.math.absoluteValue
 fun main() {
     val source = "src"
     val day = 2
-    val fileName = "input.txt"
+    val fileName = "input2.txt"
     val filePath = "${source}/day${day}/${fileName}"
 
     val content = File(filePath).readLines(Charsets.UTF_8)
