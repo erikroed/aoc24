@@ -1,93 +1,51 @@
-package day2
+package day3
 
+import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match
 import java.io.File
-import kotlin.math.abs
-import kotlin.math.absoluteValue
 
 fun main() {
     val source = "src"
-    val day = 2
-    val fileName = "input2.txt"
+    val day = 3
+    val fileName = "input.txt"
     val filePath = "${source}/day${day}/${fileName}"
 
     val content = File(filePath).readLines(Charsets.UTF_8)
 
-    part1(content)
-    part2(content)
+    //part1(content.joinToString(","))
+    part2(content.joinToString(","))
 }
 
-private fun part1(content: List<String>) {
-    var numOfSafe = 0
-    content
-        .filter(String::isNotBlank)
-        .map { it -> it.split("\\s".toRegex()).map(String::toInt) }
-        .forEach { line ->
-            if (isAllIncreasing(line) or isAllDecreasing(line)) {
-                if (verifyDistance(line)) {
-                    numOfSafe++
-                }
-            }
-        }
-
-    println("$numOfSafe reports is safe")
+private fun part1(content: String) {
+    val pattern = Regex("""mul\(\s*(\d+)\s*,\s*(\d+)\s*\)""")
+    val matches = pattern.findAll(content)
+    var sum = 0
+    matches.forEach {
+        val (x, y) = it.destructured
+        sum += (x.toInt() * y.toInt())
+    }
+    println(sum)
 }
 
-private fun verifyDistance(list: List<Int>): Boolean {
-    return list.zipWithNext().all { (a, b) -> abs(a - b) <= 3 }
-}
+private fun part2(text: String) {
+    val mulPattern = Regex("""mul\(\s*(\d+)\s*,\s*(\d+)\s*\)""")
+    val dontPattern = Regex("""don't\(\)""")
+    val doPattern = Regex("""do\(\)""")
 
-private fun isAllIncreasing(list: List<Int>): Boolean {
-    for (i in 1 until list.size) {
-        if (list[i] <= list[i - 1]) {
-            return false
+    var sum = 0L
+    var enabled = true
+
+    """$mulPattern|$doPattern|$dontPattern""".toRegex().findAll(text).forEach { match ->
+        when (match.value) {
+            "don't()" -> enabled = false
+            "do()" -> enabled = true
+            else -> if (enabled) sum += match.multiplyNumbers()
         }
     }
 
-    return true
+    println(sum)
 }
 
-private fun isAllDecreasing(list: List<Int>): Boolean {
-    for (i in 1 until list.size) {
-        if (list[i] >= list[i - 1]) {
-            return false
-        }
-    }
-
-    return true
-}
-
-private fun part2(content: List<String>) {
-    var numOfSafe = 0
-    for (line in content) {
-        val numbers = line.split("\\s".toRegex()).map(String::toInt)
-        var safe = false
-        for (i in 0..numbers.lastIndex) {
-            safe = isLineSafe(numbers.toMutableList().apply { removeAt(i) })
-            if (safe) break
-        }
-
-        if (safe) numOfSafe++
-    }
-
-    println("$numOfSafe reports is safe")
-}
-
-private fun isLineSafe(numbers: MutableList<Int>): Boolean {
-    var safe = true
-    var isUp = true
-    var isDown = true
-    for (i in 0..<numbers.lastIndex) {
-        val a = numbers[i]
-        val b = numbers[i + 1]
-        safe = safe && ((a - b).absoluteValue <= 3)
-        when {
-            a < b -> isDown = false
-            b < a -> isUp = false
-            else -> {
-                isUp = false
-                isDown = false
-            }
-        }
-    }
-    return safe && (isUp || isDown)
+private fun MatchResult.multiplyNumbers(): Long {
+    val (first, second) = destructured
+    return first.toLong() * second.toLong()
 }

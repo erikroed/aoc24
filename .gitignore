@@ -1,6 +1,6 @@
 .idea
 *.iml
-example.txt
+example*.txt
 
 ### IntelliJ IDEA ###
 out/
